@@ -5,11 +5,12 @@ import re
 import shutil
 from string import Template
 import textwrap
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Union
 
 from kubeflow.trainer.backends.localprocess import constants as local_exec_constants
 from kubeflow.trainer.backends.localprocess.types import LocalRuntimeTrainer
 from kubeflow.trainer.constants import constants
+from kubeflow.trainer.experimental import types as experimental_types
 from kubeflow.trainer.types import types
 
 
@@ -246,10 +247,12 @@ def get_cleanup_venv_script(venv_dir: str, cleanup_venv: bool = True) -> str:
 def get_local_train_job_script(
     train_job_name: str,
     venv_dir: str,
-    trainer: types.CustomTrainer,
+    trainer: Union[types.CustomTrainer, experimental_types.ExperimentalTrainer],
     runtime: types.Runtime,
     cleanup_venv: bool = True,
 ) -> tuple:
+    # TODO: support experimental trainer
+
     # use local-exec train job template
     t = Template(local_exec_constants.LOCAL_EXEC_JOB_TEMPLATE)
     # find os python binary to create venv

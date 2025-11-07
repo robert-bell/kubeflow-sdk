@@ -17,6 +17,7 @@ from collections.abc import Iterator
 from typing import Optional, Union
 
 from kubeflow.trainer.constants import constants
+from kubeflow.trainer.experimental import types as experimental_types
 from kubeflow.trainer.types import types
 
 
@@ -38,7 +39,9 @@ class ExecutionBackend(abc.ABC):
         self,
         runtime: Optional[types.Runtime] = None,
         initializer: Optional[types.Initializer] = None,
-        trainer: Optional[Union[types.CustomTrainer, types.BuiltinTrainer]] = None,
+        trainer: Optional[
+            Union[types.CustomTrainer, types.BuiltinTrainer, experimental_types.ExperimentalTrainer]
+        ] = None,
     ) -> str:
         raise NotImplementedError()
 

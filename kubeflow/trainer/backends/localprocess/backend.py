@@ -20,6 +20,7 @@ import tempfile
 from typing import Optional, Union
 import uuid
 
+from kubeflow.trainer import experimental
 from kubeflow.trainer.backends.base import ExecutionBackend
 from kubeflow.trainer.backends.localprocess import utils as local_utils
 from kubeflow.trainer.backends.localprocess.constants import local_runtimes
@@ -72,13 +73,17 @@ class LocalProcessBackend(ExecutionBackend):
         self,
         runtime: Optional[types.Runtime] = None,
         initializer: Optional[types.Initializer] = None,
-        trainer: Optional[Union[types.CustomTrainer, types.BuiltinTrainer]] = None,
+        trainer: Optional[
+            Union[types.CustomTrainer, types.BuiltinTrainer, experimental.ExperimentalTrainer]
+        ] = None,
     ) -> str:
         # set train job name
         train_job_name = random.choice(string.ascii_lowercase) + uuid.uuid4().hex[:11]
-        # localprocess backend only supports CustomTrainer
-        if not isinstance(trainer, types.CustomTrainer):
-            raise ValueError("CustomTrainer must be set with LocalProcessBackend")
+        # localprocess backend only supports CustomTrainer and ExperimentalTrainer
+        if not isinstance(trainer, (types.CustomTrainer, experimental.ExperimentalTrainer)):
+            raise ValueError(
+                f"Trainer {type(trainer).__name__} is not supported by LocalProcessBackend"
+            )
 
         # create temp dir
         venv_dir = tempfile.mkdtemp(prefix=train_job_name)
@@ -107,7 +112,7 @@ class LocalProcessBackend(ExecutionBackend):
             name=f"{train_job_name}-train",
             command=training_command,
             execution_dir=venv_dir,
-            env=trainer.env,
+            env=trainer.env,  # TODO: support experimental trainers
             dependencies=[],
         )
 

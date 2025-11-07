@@ -16,6 +16,7 @@ from collections.abc import Iterator
 import logging
 from typing import Optional, Union
 
+from kubeflow.trainer import experimental
 from kubeflow.trainer.backends.kubernetes.backend import KubernetesBackend
 from kubeflow.trainer.backends.kubernetes.types import KubernetesBackendConfig
 from kubeflow.trainer.backends.localprocess.backend import (
@@ -95,7 +96,9 @@ class TrainerClient:
         self,
         runtime: Optional[types.Runtime] = None,
         initializer: Optional[types.Initializer] = None,
-        trainer: Optional[Union[types.CustomTrainer, types.BuiltinTrainer]] = None,
+        trainer: Optional[
+            Union[types.CustomTrainer, types.BuiltinTrainer, experimental.ExperimentalTrainer]
+        ] = None,
     ) -> str:
         """Create a TrainJob. You can configure the TrainJob using one of these trainers:
 

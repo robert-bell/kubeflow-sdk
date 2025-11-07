@@ -29,6 +29,10 @@ from kubernetes import client, config, watch
 from kubeflow.trainer.backends.base import ExecutionBackend
 from kubeflow.trainer.backends.kubernetes import types as k8s_types
 from kubeflow.trainer.constants import constants
+from kubeflow.trainer.experimental import (
+    ExperimentalTrainer,
+    utils as experimental_utils,
+)
 from kubeflow.trainer.types import types
 from kubeflow.trainer.utils import utils
 
@@ -182,7 +186,9 @@ class KubernetesBackend(ExecutionBackend):
         self,
         runtime: Optional[types.Runtime] = None,
         initializer: Optional[types.Initializer] = None,
-        trainer: Optional[Union[types.CustomTrainer, types.BuiltinTrainer]] = None,
+        trainer: Optional[
+            Union[types.CustomTrainer, types.BuiltinTrainer, ExperimentalTrainer]
+        ] = None,
     ) -> str:
         if runtime is None:
             runtime = self.get_runtime(constants.TORCH_RUNTIME)
@@ -206,6 +212,11 @@ class KubernetesBackend(ExecutionBackend):
                 if runtime.trainer.trainer_type != types.TrainerType.BUILTIN_TRAINER:
                     raise ValueError(f"BuiltinTrainer can't be used with {runtime} runtime")
                 trainer_crd = utils.get_trainer_crd_from_builtin_trainer(
+                    runtime, trainer, initializer
+                )
+
+            elif isinstance(trainer, ExperimentalTrainer):
+                trainer_crd = experimental_utils.get_trainer_crd_from_experimental_trainer(
                     runtime, trainer, initializer
                 )
 
